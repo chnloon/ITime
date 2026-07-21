@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 精确闹钟权限（Android 12+） -->
+    <uses-permission android:minSdkVersion="31" android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- 开机完成后重建闹钟 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- 前台服务通知（Android 13+） -->
+    <uses-permission android:minSdkVersion="33" android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 全屏 Intent 权限（Android 10+，用于后台弹出提醒弹窗） -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- 震动权限（用于补充提醒震动） -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- 悬浮窗权限（国产 ROM 需要此权限才能弹出通知横幅） -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- 前台 Service 权限（Android 9+ 必需） -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- 前台 Service 数据同步类型（Android 14+） -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <application
+        android:label="OiGo"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTop"
+            android:exported="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- 自定义悬浮横幅通知 Activity（由 fullScreenIntent 触发） -->
+        <activity
+            android:name=".NotificationBannerActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/BannerTheme"
+            android:taskAffinity=""
+            android:excludeFromRecents="true" />
+
+        <!-- 闹钟广播接收器 -->
+        <receiver
+            android:name=".ReminderAlarmReceiver"
+            android:exported="false"
+            android:enabled="true" />
+
+        <!-- 通知动作按钮处理 -->
+        <receiver
+            android:name=".NotificationActionReceiver"
+            android:exported="false"
+            android:enabled="true" />
+
+        <!-- 前台提醒 Service（保证横幅在国产 ROM 上也能正常弹出） -->
+        <service
+            android:name=".ReminderForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- 开机自启闹钟重建（Android 8+ 需要用户至少手动启动过一次应用） -->
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+    </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
+    </queries>
+</manifest>
