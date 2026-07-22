@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/schedule_item.dart';
 import '../services/database_service.dart';
@@ -5,12 +6,17 @@ import '../services/database_service.dart';
 class ScheduleProvider extends ChangeNotifier {
   List<ScheduleItem> _items = [];
   bool _initialized = false;
+  Timer? _expiryTimer;
 
   List<ScheduleItem> get items => _items;
   bool get initialized => _initialized;
 
   ScheduleProvider() {
     loadItems();
+    // 每隔 10 秒检查一次是否有事件过期，实时移入回收站
+    _expiryTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      _cleanExpiredItems();
+    });
   }
 
   /// Public refresh — used by home_screen to trigger UI update after
@@ -26,7 +32,7 @@ class ScheduleProvider extends ChangeNotifier {
   Future<void> loadItems() async {
     try {
       _items = await DatabaseService.getActiveSchedules();
-      _cleanExpiredItems();
+      await _cleanExpiredItems();
     } catch (e) {
       debugPrint('Error loading items: $e');
       _items = [];
@@ -37,7 +43,7 @@ class ScheduleProvider extends ChangeNotifier {
   }
 
   // ════════════════════════════════════════════
-  //  过期处理（仅加载时执行一次）
+  //  过期处理 — 实时检测，过期即软删除到回收站
   // ════════════════════════════════════════════
 
   Future<void> _cleanExpiredItems() async {
@@ -54,7 +60,10 @@ class ScheduleProvider extends ChangeNotifier {
       }
     }
     if (hasExpired) {
-      _items.removeWhere((item) => item.eventTime.isBefore(DateTime.now()));
+      // 从内存列表移除已过期事件（数据库已软删除），
+      // 让它们立即从首页消失，同时出现在回收站页。
+      _items.removeWhere((item) => item.eventTime.isBefore(now));
+      notifyListeners();
     }
   }
 
@@ -88,6 +97,7 @@ class ScheduleProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _expiryTimer?.cancel();
     super.dispose();
   }
 }

@@ -62,6 +62,7 @@ class ReminderService {
       await _channel.invokeMethod('setReminder', {
         'eventId': item.id,
         'title': item.title,
+        'description': item.description,
         'location': item.location,
         'latitude': item.latitude,
         'longitude': item.longitude,
@@ -114,8 +115,27 @@ class ReminderService {
         'postNotifications': false,
         'exactAlarm': false,
         'systemAlertWindow': false,
-        'fullScreenIntent': true,
       };
+
+  /// 检查悬浮窗权限（SYSTEM_ALERT_WINDOW）。
+  Future<bool> checkSystemAlertWindow() async {
+    try {
+      final result = await _channel.invokeMethod<bool>('checkSystemAlertWindow');
+      return result ?? false;
+    } catch (e) {
+      debugPrint('checkSystemAlertWindow failed: $e');
+      return false;
+    }
+  }
+
+  /// 打开悬浮窗权限设置页。
+  Future<void> openSystemAlertWindowSettings() async {
+    try {
+      await _channel.invokeMethod('openSystemAlertWindowSettings');
+    } catch (e) {
+      debugPrint('openSystemAlertWindowSettings failed: $e');
+    }
+  }
 
   /// 请求 POST_NOTIFICATIONS 权限（Android 13+）。
   Future<bool> requestPostNotificationsPermission() async {
@@ -152,29 +172,6 @@ class ReminderService {
     }
   }
 
-  /// 检查悬浮窗权限（SYSTEM_ALERT_WINDOW）。
-  /// 国产 ROM（MIUI/EMUI/ColorOS）需要此权限才能弹出通知横幅。
-  Future<bool> checkSystemAlertWindow() async {
-    try {
-      final result = await _channel.invokeMethod<bool>(
-        'checkSystemAlertWindow',
-      );
-      return result ?? false;
-    } catch (e) {
-      debugPrint('checkSystemAlertWindow failed: $e');
-      return false;
-    }
-  }
-
-  /// 打开悬浮窗权限设置页面。
-  Future<void> openSystemAlertWindowSettings() async {
-    try {
-      await _channel.invokeMethod('openSystemAlertWindowSettings');
-    } catch (e) {
-      debugPrint('openSystemAlertWindowSettings failed: $e');
-    }
-  }
-
   /// 打开 App 通知设置页面。
   Future<void> openAppNotificationSettings() async {
     try {
@@ -184,26 +181,31 @@ class ReminderService {
     }
   }
 
-  /// 检查全屏 Intent 权限（Android 14+）。
-  /// setFullScreenIntent 需要此权限才能触发横幅 Activity。
-  Future<bool> checkFullScreenIntent() async {
+  /// 打开 App 详情设置页（电池优化/自启动的通用入口）。
+  Future<void> openAppDetailsSettings() async {
     try {
-      final result = await _channel.invokeMethod<bool>(
-        'checkFullScreenIntent',
-      );
-      return result ?? true;
+      await _channel.invokeMethod('openAppDetailsSettings');
     } catch (e) {
-      debugPrint('checkFullScreenIntent failed: $e');
-      return true;
+      debugPrint('openAppDetailsSettings failed: $e');
     }
   }
 
-  /// 打开系统通知设置页面让用户手动启用全屏通知。
-  Future<void> openNotificationSettings() async {
+  /// 打开电池优化设置页。
+  Future<void> openBatteryOptimizationSettings() async {
     try {
-      await _channel.invokeMethod('openNotificationSettings');
+      await _channel.invokeMethod('openBatteryOptimizationSettings');
     } catch (e) {
-      debugPrint('openNotificationSettings failed: $e');
+      debugPrint('openBatteryOptimizationSettings failed: $e');
+    }
+  }
+
+  /// 打开华为自启动管理页。
+  /// 仅在华为/荣耀手机上有效，其他机型降级为 App 详情页。
+  Future<void> openHuaweiAutoLaunch() async {
+    try {
+      await _channel.invokeMethod('openHuaweiAutoLaunch');
+    } catch (e) {
+      debugPrint('openHuaweiAutoLaunch failed: $e');
     }
   }
 
@@ -270,6 +272,17 @@ class ReminderService {
     }
 
     return true;
+  }
+
+  /// 检查悬浮窗权限是否已授予。
+  Future<bool> hasOverlayPermission() async {
+    try {
+      final result = await _channel.invokeMethod<bool>('checkSystemAlertWindow');
+      return result ?? false;
+    } catch (e) {
+      debugPrint('hasOverlayPermission failed: $e');
+      return false;
+    }
   }
 
   /// 清理资源

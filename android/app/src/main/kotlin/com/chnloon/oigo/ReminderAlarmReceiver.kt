@@ -19,21 +19,14 @@ import androidx.core.app.NotificationCompat
  * ## 提醒触发流程
  *
  * 当 AlarmManager 触发的提醒时间到达时：
- *   1. ★ 直接启动 NotificationBannerActivity（兜底路径 — 部分国产 ROM 无法拦截）
- *   2. 发送提醒到前台 Service → Service 执行全部三条路径（WindowManager 覆盖层 + Activity + 通知）
- *   3. 发布通知（带 setFullScreenIntent）→ 触发 NotificationBannerActivity 弹出横幅
+ *   1. 通过 setFullScreenIntent 通知启动 NotificationBannerActivity（主弹窗）
+ *   2. 同时唤醒前台 Service 播放铃声+震动（绕过国产 ROM 对通知音量的限制）
  *
  * ## 预热闹钟（Warmup）
  *
  * 主闹钟设置时同时设置一个提前 60 秒的预热闹钟。预热闹钟不显示提醒，
  * 仅负责唤醒前台 Service。这解决了国产 ROM 长时间后杀死前台 Service 的问题：
  * 预热闹钟在真实提醒前 60 秒启动 Service，确保 Service 在提醒时可用。
- *
- * ## 为什么需要双重触发路径
- *
- * 国产 ROM（MIUI / EMUI / ColorOS）会拦截从 BroadcastReceiver 发起的 Activity 启动。
- * 但有些 ROM 仅拦截 startActivity()，不拦截 setFullScreenIntent；另一些则相反。
- * 本接收器采用「两条路径都走」策略，提高至少一条路径生效的概率。
  *
  * ## 关于通知渠道
  *
@@ -49,19 +42,10 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
         const val CHANNEL_DESC = "日程事件的准时提醒"
 
         /**
-         * 强制重建通知渠道（删除旧 → 新建）。
-         * 每次提醒触发时调用，确保 IMPORTANCE_HIGH 不被 Android 渠道锁定降级。
+         * 创建高优先级提醒通知渠道。
+         * 只在渠道不存在时创建，不删除重建，避免鸿蒙渠道校验异常。
          */
-        fun ensureChannelHighImportance(context: Context) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                nm.deleteNotificationChannel(CHANNEL_ID)
-                createChannelFresh(context, nm)
-                Log.d(TAG, "通知渠道已强制重建: $CHANNEL_ID (IMPORTANCE_HIGH)")
-            }
-        }
-
-        private fun createChannelFresh(context: Context, nm: NotificationManager) {
+        fun createChannelFresh(context: Context, nm: NotificationManager) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
             val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             val audioAttributes = AudioAttributes.Builder()
@@ -81,15 +65,30 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
             }
             nm.createNotificationChannel(channel)
         }
+
+        /**
+         * 确保高优先级通知渠道存在。
+         * 如果渠道不存在或级别不足，则创建/升级。
+         * 不删除重建，避免鸿蒙系统渠道校验异常。
+         */
+        fun ensureChannelHighImportance(context: Context) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val existing = nm.getNotificationChannel(CHANNEL_ID)
+                if (existing != null && existing.importance >= NotificationManager.IMPORTANCE_HIGH) {
+                    Log.d(TAG, "通知渠道已存在且级别正确: $CHANNEL_ID")
+                    return
+                }
+                createChannelFresh(context, nm)
+                Log.d(TAG, "通知渠道已创建/升级: $CHANNEL_ID (IMPORTANCE_HIGH)")
+            }
+        }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         val eventId = intent.getIntExtra("event_id", -1)
 
         // ★ 预热闹钟处理：不显示提醒，只负责唤醒前台 Service
-        //    主闹钟设置时同时设置了提前 60 秒的预热闹钟。
-        //    如果国产 ROM 杀死了前台 Service，预热闹钟在此处重新启动它，
-        //    确保 60 秒后的真实提醒能通过已运行的 Service 触发覆盖层。
         val isWarmup = intent.getBooleanExtra("is_warmup", false)
         if (isWarmup) {
             Log.d(TAG, "预热闹钟触发: eventId=$eventId — 启动前台 Service 以保持进程存活")
@@ -99,50 +98,30 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
             } catch (e: Exception) {
                 Log.w(TAG, "预热闹钟启动 Service 失败: ${e.message}")
             }
-            return // 不显示任何提醒
+            return
         }
 
         val title = intent.getStringExtra("title") ?: return
         val description = intent.getStringExtra("description") ?: ""
         val location = intent.getStringExtra("location") ?: ""
-        val latitude = intent.getDoubleExtra("latitude", 0.0)
-        val longitude = intent.getDoubleExtra("longitude", 0.0)
-        val eventTime = intent.getStringExtra("event_time") ?: ""
         val ringtoneUri = intent.getStringExtra("ringtone_uri") ?: ""
 
         Log.d(TAG, "提醒触发: eventId=$eventId, title=$title")
 
         try {
-            // 1. 强制重建通知渠道（确保 IMPORTANCE_HIGH）
+            // 1. 确保通知渠道 IMPORTANCE_HIGH
             ensureChannelHighImportance(context)
 
-            // 2. ★ 路径 A：直接启动 NotificationBannerActivity（不依赖通知系统）
-            //    某些国产 ROM 不拦截 BroadcastReceiver 的 startActivity()
-            try {
-                val directIntent = Intent(context, NotificationBannerActivity::class.java).apply {
-                    putExtra("event_id", eventId)
-                    putExtra("title", title)
-                    putExtra("location", location)
-                    putExtra("latitude", latitude)
-                    putExtra("longitude", longitude)
-                    putExtra("event_time", eventTime)
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                }
-                context.startActivity(directIntent)
-                Log.d(TAG, "路径 A（直接启动Activity）已触发: eventId=$eventId")
-            } catch (e: Exception) {
-                Log.w(TAG, "路径 A 失败（国产 ROM 可能拦截了背景启动）: ${e.message}")
-            }
-
-            // 3. 唤醒持久前台 Service（保持进程存活用于后续闹钟）
+            // 2. 同时唤醒前台 Service 保持进程活跃
             ReminderForegroundService.sendAlarm(
-                context, eventId, title, description, location, latitude, longitude, eventTime, ringtoneUri
+                context, eventId, title, description, location, 0.0, 0.0, "", ringtoneUri
             )
 
-            // 4. ★ 路径 B：通过 setFullScreenIntent 发布通知触发横幅
+            // 3. 发布标准通知 — 微信风格横幅提醒
+            //    仅使用 IMPORTANCE_HIGH + CATEGORY_REMINDER + DEFAULT_ALL
+            //    不需要 fullScreenIntent / SYSTEM_ALERT_WINDOW
             val contentText = buildString {
-                append("点击查看详情")
+                append(description.ifEmpty { "点击查看详情" })
                 if (location.isNotEmpty()) {
                     append(" · $location")
                 }
@@ -160,22 +139,6 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            val fullScreenIntent = Intent(context, NotificationBannerActivity::class.java).apply {
-                putExtra("event_id", eventId)
-                putExtra("title", title)
-                putExtra("location", location)
-                putExtra("latitude", latitude)
-                putExtra("longitude", longitude)
-                putExtra("event_time", eventTime)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            }
-            val fullScreenPendingIntent = PendingIntent.getActivity(
-                context, eventId * 1000, fullScreenIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            // 铃声 URI：如果有自定义铃声则使用
             val notificationSoundUri = if (ringtoneUri.isNotEmpty()) {
                 Uri.parse(ringtoneUri)
             } else {
@@ -187,14 +150,12 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
                 .setContentTitle(title)
                 .setContentText(contentText)
                 .setTicker("提醒: $title")
-                .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setSound(notificationSoundUri)
-                .setVibrate(longArrayOf(0, 300, 200, 300))
                 .setAutoCancel(true)
                 .setContentIntent(tapPendingIntent)
-                .setFullScreenIntent(fullScreenPendingIntent, true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .build()
 
@@ -202,7 +163,7 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.notify(eventId, notification)
 
-            Log.d(TAG, "路径 B（setFullScreenIntent 通知）已发布: eventId=$eventId")
+            Log.d(TAG, "标准通知已发布: eventId=$eventId, title=$title")
         } catch (e: Exception) {
             Log.e(TAG, "处理提醒事件失败: ${e.message}")
         }

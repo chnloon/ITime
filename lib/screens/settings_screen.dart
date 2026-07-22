@@ -17,7 +17,24 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  Map<String, dynamic> _permissions = {};
+  bool _permissionsLoaded = false;
+
   @override
+  void initState() {
+    super.initState();
+    _loadPermissions();
+  }
+
+  Future<void> _loadPermissions() async {
+    final perms = await ReminderService().checkPermissions();
+    if (mounted) {
+      setState(() {
+        _permissions = perms;
+        _permissionsLoaded = true;
+      });
+    }
+  }
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? Colors.black : const Color(0xFFF2F2F7);
@@ -125,6 +142,92 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       );
                     },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // ── Notification & Test section ──
+              _buildSectionHeader(Translations.tr('test_reminder')),
+              _buildSettingCard(
+                context,
+                children: [
+                  _buildNavTile(
+                    context,
+                    icon: Icons.notification_add_outlined,
+                    title: Translations.tr('test_reminder'),
+                    subtitle: Translations.tr('test_reminder_desc'),
+                    onTap: () => _testReminder(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // ── Permission & Power Settings section ──
+              _buildSectionHeader(Translations.tr('permission_settings')),
+              _buildSettingCard(
+                context,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    child: Text(
+                      Translations.tr('permission_guide_main_title'),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.white70 : const Color(0xFF3C3C43),
+                      ),
+                    ),
+                  ),
+                  _buildDivider(),
+                  // 精确闹钟权限
+                  _buildPermissionStatusTile(
+                    context: context,
+                    icon: Icons.timer_outlined,
+                    title: Translations.tr('exact_alarm_permission_title'),
+                    statusKey: 'exactAlarm',
+                    statusGranted: Translations.tr('permission_exact_alarm_status_granted'),
+                    statusDenied: Translations.tr('permission_exact_alarm_status_denied'),
+                    onAction: () => ReminderService().openExactAlarmSettings(),
+                  ),
+                  _buildDivider(),
+                  // 悬浮窗权限
+                  _buildPermissionStatusTile(
+                    context: context,
+                    icon: Icons.crop_square_outlined,
+                    title: Translations.tr('overlay_permission_title'),
+                    statusKey: 'systemAlertWindow',
+                    statusGranted: Translations.tr('permission_overlay_status_granted'),
+                    statusDenied: Translations.tr('permission_overlay_status_denied'),
+                    onAction: () => ReminderService().openSystemAlertWindowSettings(),
+                  ),
+                  _buildDivider(),
+                  // 自启动管理
+                  _buildActionTile(
+                    context: context,
+                    icon: Icons.power_settings_new,
+                    title: Translations.tr('permission_auto_launch'),
+                    subtitle: Translations.tr('permission_auto_launch_desc'),
+                    actionLabel: Translations.tr('permission_auto_launch_action'),
+                    onAction: () => ReminderService().openHuaweiAutoLaunch(),
+                  ),
+                  _buildDivider(),
+                  // 电池优化
+                  _buildActionTile(
+                    context: context,
+                    icon: Icons.battery_std,
+                    title: Translations.tr('permission_battery'),
+                    subtitle: Translations.tr('permission_battery_desc'),
+                    actionLabel: Translations.tr('permission_battery_action'),
+                    onAction: () => ReminderService().openBatteryOptimizationSettings(),
+                  ),
+                  _buildDivider(),
+                  // 华为纯净模式提示
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                    child: Text(
+                      Translations.tr('permission_guide_huawei_hint'),
+                      style: const TextStyle(fontSize: 12, color: Color(0xFFFF9500)),
+                    ),
                   ),
                 ],
               ),
@@ -489,6 +592,131 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  /// 权限状态卡片：显示权限名称、当前状态（已允许/未允许）、操作按钮。
+  Widget _buildPermissionStatusTile({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String statusKey,
+    required String statusGranted,
+    required String statusDenied,
+    required VoidCallback onAction,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF1C1C1E);
+    final loaded = _permissionsLoaded;
+    final granted = _permissions[statusKey] == true;
+    final statusText = !loaded ? '...' : (granted ? statusGranted : statusDenied);
+    final statusColor = !loaded
+        ? const Color(0xFF8E8E93)
+        : (granted ? const Color(0xFF34C759) : const Color(0xFFFF3B30));
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFF007AFF), size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(fontSize: 16, color: textColor),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            statusText,
+            style: TextStyle(fontSize: 13, color: statusColor, fontWeight: FontWeight.w500),
+          ),
+          if (!loaded)
+            const SizedBox(width: 8)
+          else if (!granted) ...[
+            const SizedBox(width: 8),
+            SizedBox(
+              height: 32,
+              child: ElevatedButton(
+                onPressed: () {
+                  onAction();
+                  // 返回后刷新状态
+                  Future.delayed(const Duration(seconds: 2), _loadPermissions);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF007AFF),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(Translations.tr('go_to_settings')),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// 动作引导卡片：带描述文字和操作按钮。
+  Widget _buildActionTile({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String actionLabel,
+    required VoidCallback onAction,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF1C1C1E);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(icon, color: const Color(0xFF007AFF), size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 16, color: textColor),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            height: 32,
+            child: ElevatedButton(
+              onPressed: onAction,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF007AFF),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(actionLabel),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDivider() {
     return const Divider(
       height: 1,
@@ -527,6 +755,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  void _testReminder(BuildContext context) async {
+    try {
+      await ReminderService().testNotification(delayMs: 10000);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(Translations.tr('test_reminder_sent')),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('测试提醒失败: $e')),
+        );
+      }
+    }
   }
 
   void _checkUpdate(BuildContext context) {

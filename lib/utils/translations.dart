@@ -78,9 +78,6 @@ class Translations {
       'second_unit': '秒',
       'started': '已开始',
       'calculating': '事件 计算中...',
-      'overlay_permission_title': '悬浮窗权限',
-      'overlay_permission_desc':
-          '为了在锁屏或使用其他应用时也能弹出提醒窗口，请授予「显示在其他应用上层」权限。',
       'go_to_settings': '去设置',
       'grant_permission': '授权',
       'ok_got_it': '知道了',
@@ -92,10 +89,6 @@ class Translations {
       'exact_alarm_permission_title': '精确闹钟权限',
       'exact_alarm_permission_desc':
           '用于在指定时间准确触发提醒，不会延迟。',
-      'overlay_permission_title': '悬浮窗权限',
-      'overlay_permission_desc':
-          '为了在锁屏或使用其他应用时也能弹出提醒窗口，请授予「显示在其他应用上层」权限。',
-      'system_alert_warning': '检测到未授予悬浮窗权限，部分机型无法弹出顶部横幅提醒。',
       'notification_channel_name': '事件提醒',
       'notification_channel_desc': 'OiGo 日程事件提醒通知',
       'app_subtitle': 'OiGo - 智能日程提醒',
@@ -129,6 +122,25 @@ class Translations {
       'year_label': '年',
       'month_label': '月',
       'day_label': '日',
+
+      // 权限与省电设置
+      'permission_settings': '权限与省电设置',
+      'permission_settings_desc': '如提醒不弹出，请逐一检查以下设置',
+      'permission_exact_alarm_status_granted': '✅ 已允许',
+      'permission_exact_alarm_status_denied': '❌ 未允许',
+      'permission_auto_launch': '自启动管理',
+      'permission_auto_launch_desc': '华为/小米等需开启自启动和后台活动，否则闹钟触发后应用无法响应',
+      'permission_auto_launch_action': '去系统设置',
+      'permission_battery': '电池优化',
+      'permission_battery_desc': '设为「不优化」防止后台进程被系统杀死',
+      'permission_battery_action': '去设置',
+      'permission_guide_huawei_hint': '💡 华为手机建议关闭「纯净模式」，否则侧载应用通知可能被拦截',
+      'permission_guide_main_title': '提醒不显示？请完成以下设置',
+      'overlay_permission_title': '悬浮窗权限',
+      'overlay_permission_desc': '用于在其他应用上层显示提醒横幅，确保通知不被系统拦截',
+      'system_alert_warning': '悬浮窗权限未开启，部分设备可能无法弹出提醒横幅',
+      'permission_overlay_status_granted': '✅ 已允许',
+      'permission_overlay_status_denied': '❌ 未允许',
     },
     'zh_HK': {
       'app_name': 'OiGo',
@@ -206,9 +218,6 @@ class Translations {
       'second_unit': '秒',
       'started': '已開始',
       'calculating': '事件 計算中...',
-      'overlay_permission_title': '懸浮窗權限',
-      'overlay_permission_desc':
-          '為了在鎖屏或使用其他應用時也能彈出提醒窗口，請授予「顯示在其他應用上層」權限。',
       'go_to_settings': '去設置',
       'grant_permission': '授權',
       'ok_got_it': '知道了',
@@ -220,10 +229,6 @@ class Translations {
       'exact_alarm_permission_title': '精確鬧鐘權限',
       'exact_alarm_permission_desc':
           '用於在指定時間準確觸發提醒，不會延遲。',
-      'overlay_permission_title': '懸浮窗權限',
-      'overlay_permission_desc':
-          '為了在鎖屏或使用其他應用時也能彈出提醒窗口，請授予「顯示在其他應用上層」權限。',
-      'system_alert_warning': '檢測到未授予懸浮窗權限，部分機型無法彈出頂部橫幅提醒。',
       'notification_channel_name': '事件提醒',
       'notification_channel_desc': 'OiGo 日程事件提醒通知',
       'app_subtitle': 'OiGo - 智能日程提醒',
@@ -257,6 +262,25 @@ class Translations {
       'year_label': '年',
       'month_label': '月',
       'day_label': '日',
+
+      // 权限与省电设置
+      'permission_settings': '權限與省電設置',
+      'permission_settings_desc': '如提醒不彈出，請逐一檢查以下設置',
+      'permission_exact_alarm_status_granted': '✅ 已允許',
+      'permission_exact_alarm_status_denied': '❌ 未允許',
+      'permission_auto_launch': '自啟動管理',
+      'permission_auto_launch_desc': '華為/小米等需開啟自啟動和後台活動，否則鬧鐘觸發後應用無法響應',
+      'permission_auto_launch_action': '去系統設置',
+      'permission_battery': '電池優化',
+      'permission_battery_desc': '設為「不優化」防止後台進程被系統殺死',
+      'permission_battery_action': '去設置',
+      'permission_guide_huawei_hint': '💡 華為手機建議關閉「純淨模式」，否則側載應用通知可能被攔截',
+      'permission_guide_main_title': '提醒不顯示？請完成以下設置',
+      'overlay_permission_title': '懸浮窗權限',
+      'overlay_permission_desc': '用於在其他應用上層顯示提醒橫幅，確保通知不被系統攔截',
+      'system_alert_warning': '懸浮窗權限未開啟，部分設備可能無法彈出提醒橫幅',
+      'permission_overlay_status_granted': '✅ 已允許',
+      'permission_overlay_status_denied': '❌ 未允許',
     },
     'en': {
       'app_name': 'OiGo',
@@ -334,9 +358,6 @@ class Translations {
       'second_unit': 's',
       'started': 'Started',
       'calculating': 'Calculating...',
-      'overlay_permission_title': 'Overlay Permission',
-      'overlay_permission_desc':
-          'To show reminder popups even when the screen is locked or using other apps, please grant the "Display over other apps" permission.',
       'go_to_settings': 'Go to Settings',
       'grant_permission': 'Grant',
       'ok_got_it': 'Got it',
@@ -349,9 +370,6 @@ class Translations {
       'exact_alarm_permission_title': 'Exact Alarm Permission',
       'exact_alarm_permission_desc':
           'Required to trigger reminders at the exact scheduled time without delay.',
-      'overlay_permission_title': 'Overlay Permission',
-      'overlay_permission_desc':
-          'To show reminder popups even when the screen is locked or using other apps, please grant the "Display over other apps" permission.',
       'system_alert_warning':
           'Overlay permission not granted. Some devices may not show head-up notification alerts.',
       'notification_channel_name': 'Event Reminder',
@@ -387,6 +405,25 @@ class Translations {
       'year_label': 'yr',
       'month_label': 'mo',
       'day_label': 'day',
+
+      // Permission & power settings
+      'permission_settings': 'Permissions & Power Settings',
+      'permission_settings_desc': 'If reminders don\'t show, check each setting below',
+      'permission_exact_alarm_status_granted': '✅ Granted',
+      'permission_exact_alarm_status_denied': '❌ Denied',
+      'permission_auto_launch': 'Auto-start Management',
+      'permission_auto_launch_desc': 'Huawei/Xiaomi require auto-start & background activity for reliable alarms',
+      'permission_auto_launch_action': 'Open System Settings',
+      'permission_battery': 'Battery Optimization',
+      'permission_battery_desc': 'Set to "Don\'t optimize" to prevent the system from killing the process',
+      'permission_battery_action': 'Open Settings',
+      'permission_guide_huawei_hint': '💡 Huawei users: disable "Pure Mode" to avoid notification blocking for sideloaded apps',
+      'permission_guide_main_title': 'Reminders not showing? Complete these steps',
+      'overlay_permission_title': 'Overlay Permission',
+      'overlay_permission_desc': 'Required to show reminder banners on top of other apps, bypassing system notification restrictions',
+      'system_alert_warning': 'Overlay permission not granted. Some devices may not show head-up notification alerts.',
+      'permission_overlay_status_granted': '✅ Granted',
+      'permission_overlay_status_denied': '❌ Denied',
     },
   };
 

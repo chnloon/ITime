@@ -23,9 +23,6 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
-// Android 14 (API 34) 的编译时常量（防止低版本 SDK 编译报错）
-private const val API_34 = 34
-
 class MainActivity : FlutterActivity() {
 
     companion object {
@@ -247,8 +244,14 @@ private fun setReminderAlarm(context: Context, args: Map<*, *>) {
                         "postNotifications" to hasPostNotificationsPermission(),
                         "exactAlarm" to hasExactAlarmPermission(),
                         "systemAlertWindow" to hasSystemAlertWindowPermission(),
-                        "fullScreenIntent" to hasFullScreenIntentPermission(),
                     ))
+                }
+                "checkSystemAlertWindow" -> {
+                    result.success(hasSystemAlertWindowPermission())
+                }
+                "openSystemAlertWindowSettings" -> {
+                    openSystemAlertWindowSettings()
+                    result.success(true)
                 }
                 "requestPostNotificationsPermission" -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -282,24 +285,10 @@ private fun setReminderAlarm(context: Context, args: Map<*, *>) {
                     }
                     result.success(true)
                 }
-                // ★ 新增：检查悬浮窗权限
-                "checkSystemAlertWindow" -> {
-                    result.success(hasSystemAlertWindowPermission())
-                }
-                // ★ 新增：打开悬浮窗权限设置页
-                "openSystemAlertWindowSettings" -> {
-                    openSystemAlertWindowSettings()
-                    result.success(true)
-                }
-                // ★ 新增：打开 App 通知设置页
+                // ★ 打开 App 通知设置页
                 "openAppNotificationSettings" -> {
                     openAppNotificationSettings()
                     result.success(true)
-                }
-                // ★ Android 14+：检查全屏 Intent 权限
-                //    setFullScreenIntent 需要此权限才能触发横幅 Activity
-                "checkFullScreenIntent" -> {
-                    result.success(hasFullScreenIntentPermission())
                 }
                 // ★ 测试提醒：调度真实闹钟（走完整 AlarmManager 路径）
                 //   从 Flutter 侧接收 delayMs 参数，默认 10 秒
@@ -313,6 +302,40 @@ private fun setReminderAlarm(context: Context, args: Map<*, *>) {
                 // ★ Android 14+：打开通知设置页让用户手动启用全屏 Intent
                 "openNotificationSettings" -> {
                     openAppNotificationSettings()
+                    result.success(true)
+                }
+                // ★ 打开 App 详情设置页（电池优化/自启动的通用入口）
+                "openAppDetailsSettings" -> {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.parse("package:$packageName")
+                    }
+                    startActivity(intent)
+                    result.success(true)
+                }
+                // ★ 打开电池优化设置页
+                "openBatteryOptimizationSettings" -> {
+                    val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                    startActivity(intent)
+                    result.success(true)
+                }
+                // ★ 华为自启动管理页
+                "openHuaweiAutoLaunch" -> {
+                    try {
+                        val intent = Intent().apply {
+                            setClassName(
+                                "com.huawei.systemmanager",
+                                "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"
+                            )
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "华为自启动页跳转失败，降级到 App 详情页: ${e.message}")
+                        val fallback = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.parse("package:$packageName")
+                        }
+                        startActivity(fallback)
+                    }
                     result.success(true)
                 }
                 else -> result.notImplemented()
@@ -366,14 +389,22 @@ private fun setReminderAlarm(context: Context, args: Map<*, *>) {
     // ── 通知渠道 ──
 
     /**
-     * 创建/重建提醒通知渠道（Android 8+ 必需）。
+     * 创建提醒通知渠道（Android 8+ 必需）。
      *
-     * 每次应用启动时强制重建，避免 Android 渠道锁定机制导致
-     * 已存在的渠道无法将 IMPORTANCE_DEFAULT 升级为 IMPORTANCE_HIGH。
+     * 应用启动时创建一次，使用 IMPORTANCE_HIGH 确保横幅弹出。
+     * 不删除重建，避免鸿蒙对渠道校验严格导致异常。
      */
     private fun createNotificationChannel() {
-        // 使用 Receiver 的共享方法强制重建（删除+新建）
-        ReminderAlarmReceiver.ensureChannelHighImportance(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val existing = nm.getNotificationChannel(NOTIFICATION_CHANNEL_ID)
+            if (existing != null && existing.importance >= NotificationManager.IMPORTANCE_HIGH) {
+                Log.d(TAG, "通知渠道已存在且级别正确，跳过创建")
+                return
+            }
+            ReminderAlarmReceiver.createChannelFresh(this, nm)
+            Log.d(TAG, "通知渠道已创建: $NOTIFICATION_CHANNEL_ID (IMPORTANCE_HIGH)")
+        }
     }
 
     // ── 测试提醒 ──
@@ -443,28 +474,21 @@ private fun setReminderAlarm(context: Context, args: Map<*, *>) {
         }
     }
 
+    private fun openAppNotificationSettings() {
+        val intent = Intent()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        } else {
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            intent.data = Uri.parse("package:$packageName")
+        }
+        startActivity(intent)
+    }
+
     private fun hasSystemAlertWindowPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Settings.canDrawOverlays(this)
-        } else {
-            true
-        }
-    }
-
-    // ── 全屏 Intent 权限（Android 14+，setFullScreenIntent 必需） ──
-
-    /**
-     * 检查是否拥有 USE_FULL_SCREEN_INTENT 权限。
-     *
-     * Android 14+ 上侧载的应用默认被拒绝此权限，
-     * 需要用户在 设置 → 通知 → 允许全屏通知 中手动开启。
-     *
-     * Android 13 及以下：只要声明了权限即自动授权。
-     */
-    private fun hasFullScreenIntentPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= API_34) {
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.canUseFullScreenIntent()
         } else {
             true
         }
@@ -475,18 +499,7 @@ private fun setReminderAlarm(context: Context, args: Map<*, *>) {
             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
             Uri.parse("package:$packageName")
         )
-        startActivity(intent)
-    }
-
-    private fun openAppNotificationSettings() {
-        val intent = Intent()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-            intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-        } else {
-            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-            intent.data = Uri.parse("package:$packageName")
-        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }
 

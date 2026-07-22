@@ -134,17 +134,26 @@ class _ScheduleCardState extends State<ScheduleCard>
     });
   }
 
-  /// Card background color: clean white in light mode, dark in dark mode.
+  /// Card background color.
+  /// - Expired: gray
+  /// - Active:  clean white in light mode, dark in dark mode
   Color _getCardColor(bool isDark) {
+    if (widget.item.eventTime.isBefore(DateTime.now())) {
+      return isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA);
+    }
     if (isDark) return const Color(0xFF1C1C1E);
     return Colors.white;
   }
 
   /// Accent color by urgency level (left border + subtle shadow tint).
-  /// - ≤24h: red    (urgent)
-  /// - ≤3d:  orange (approaching)
-  /// - >3d:  green  (plenty of time)
-  Color _getAccentColor(int urgency) {
+  /// - Expired:  gray
+  /// - ≤24h:     red    (urgent)
+  /// - ≤3d:      orange (approaching)
+  /// - >3d:      green  (plenty of time)
+  Color _getAccentColor(int urgency, bool isDark) {
+    if (widget.item.eventTime.isBefore(DateTime.now())) {
+      return isDark ? const Color(0xFF3A3A3C) : const Color(0xFFC7C7CC);
+    }
     switch (urgency) {
       case 2:
         return const Color(0xFFFF3B30);
@@ -254,7 +263,7 @@ class _ScheduleCardState extends State<ScheduleCard>
     final textColor = isDark ? Colors.white : const Color(0xFF1C1C1E);
     final subtitleColor = const Color(0xFF8E8E93);
     final urgency = DateHelper.getUrgencyLevel(widget.item.eventTime);
-    final accentColor = _getAccentColor(urgency);
+    final accentColor = _getAccentColor(urgency, isDark);
 
     return GestureDetector(
       onTap: _closeSlide,

@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  /// 首次启动权限引导对话框：依次引导通知 → 精确闹钟 → 悬浮窗
+  /// 首次启动权限引导对话框：依次引导通知 → 精确闹钟 → 悬浮窗 → ROM白名单
   void _showPermissionGuide() {
     showDialog(
       context: context,
@@ -193,20 +193,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             buttonText: Translations.tr('grant_permission'),
                             onPressed: _requestExactAlarm,
                           ),
-
                         // 悬浮窗权限
                         if (_systemAlertWindowMissing)
                           _buildWarningBanner(
-                            icon: Icons.layers_outlined,
-                            color: const Color(0xFF007AFF),
+                            icon: Icons.crop_square_outlined,
+                            color: const Color(0xFFFF9500),
                             message: Translations.tr('system_alert_warning'),
                             buttonText: Translations.tr('go_to_settings'),
-                            onPressed: () async {
-                              await ReminderService()
-                                  .openSystemAlertWindowSettings();
-                              await Future.delayed(
-                                  const Duration(seconds: 2));
-                              _checkPermissions();
+                            onPressed: () {
+                              ReminderService().openSystemAlertWindowSettings();
                             },
                           ),
                       ],
@@ -360,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
 //  首次启动权限引导对话框
 // ═══════════════════════════════════════════════════
 
-/// 引导用户依次授予通知、精确闹钟、悬浮窗三项权限，
+/// 引导用户依次授予通知、精确闹钟权限，
 /// 最后指导用户将 OiGo 加入系统白名单（国产 ROM 专属）。
 class _PermissionGuideDialog extends StatefulWidget {
   final VoidCallback? onComplete;
@@ -372,15 +367,14 @@ class _PermissionGuideDialog extends StatefulWidget {
 }
 
 class _PermissionGuideDialogState extends State<_PermissionGuideDialog> {
-  int _currentStep = 0; // 0=通知+全屏, 1=精确闹钟, 2=悬浮窗, 3=系统白名单
+  int _currentStep = 0; // 0=通知, 1=精确闹钟, 2=悬浮窗, 3=系统白名单
   bool _notifGranted = false;
-  bool _fullScreenGranted = true;
   bool _exactAlarmGranted = false;
   bool _overlayGranted = false;
 
   static const _stepCount = 4;
 
-  bool get _allDone => _notifGranted && _fullScreenGranted && _exactAlarmGranted && _overlayGranted;
+  bool get _allDone => _notifGranted && _exactAlarmGranted && _overlayGranted;
 
   @override
   Widget build(BuildContext context) {
@@ -471,7 +465,7 @@ class _PermissionGuideDialogState extends State<_PermissionGuideDialog> {
 
   bool _isStepDone(int step) {
     switch (step) {
-      case 0: return _notifGranted && _fullScreenGranted;
+      case 0: return _notifGranted;
       case 1: return _exactAlarmGranted;
       case 2: return _overlayGranted;
       case 3: return true; // ROM 白名单步骤无需授权按钮
@@ -496,23 +490,7 @@ class _PermissionGuideDialogState extends State<_PermissionGuideDialog> {
           ),
         );
       case 2:
-        return _buildPermissionStep(
-          icon: Icons.layers_outlined,
-          color: const Color(0xFF34C759),
-          title: Translations.tr('overlay_permission_title'),
-          desc: Translations.tr('overlay_permission_desc'),
-          isGranted: _overlayGranted,
-          onGrant: () async {
-            await ReminderService().openSystemAlertWindowSettings();
-            // 等回到应用后用系统检查
-            await Future.delayed(const Duration(seconds: 2));
-            final granted =
-                await ReminderService().checkSystemAlertWindow();
-            if (mounted) {
-              setState(() => _overlayGranted = granted);
-            }
-          },
-        );
+        return _buildOverlayStep();
       case 3:
         return _buildRomWhitelistStep();
       default:
@@ -533,6 +511,89 @@ class _PermissionGuideDialogState extends State<_PermissionGuideDialog> {
         _currentStep++;
       }
     });
+  }
+
+  /// 构建第 3 步：悬浮窗权限。
+  /// 需要用户授予 SYSTEM_ALERT_WINDOW 权限，弹出悬浮窗横幅。
+  Widget _buildOverlayStep() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFF9500).withAlpha(26),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(
+            _overlayGranted ? Icons.check_circle : Icons.crop_square_outlined,
+            color: _overlayGranted ? const Color(0xFF34C759) : const Color(0xFFFF9500),
+            size: 32,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          Translations.tr('overlay_permission_title'),
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          Translations.tr('overlay_permission_desc'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF8E8E93),
+          ),
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _overlayGranted
+                ? null
+                : () async {
+                    await ReminderService().openSystemAlertWindowSettings();
+                    // 等待用户返回后检查权限
+                    await Future.delayed(const Duration(seconds: 2));
+                    final granted = await ReminderService().checkSystemAlertWindow();
+                    if (!mounted) return;
+                    setState(() {
+                      _overlayGranted = granted;
+                      if (_currentStep < _stepCount - 1) {
+                        _currentStep++;
+                      }
+                    });
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _overlayGranted
+                  ? const Color(0xFF34C759)
+                  : const Color(0xFFFF9500),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              elevation: 0,
+            ),
+            child: Text(
+              _overlayGranted
+                  ? '✓ ${Translations.tr('confirm')}'
+                  : Translations.tr('go_to_settings'),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   /// 构建第 4 步：国产 ROM 系统白名单引导。
@@ -746,38 +807,19 @@ class _PermissionGuideDialogState extends State<_PermissionGuideDialog> {
     );
   }
 
-  /// 构建第 1 步：通知权限 + 全屏 Intent 权限（Android 14+）。
-  ///
-  /// Android 14+ 上侧载的应用需要手动在通知设置中开启「全屏通知」，
-  /// 否则 setFullScreenIntent 会被系统忽略，横幅无法弹出。
+  /// 构建第 1 步：通知权限。
   Widget _buildNotificationStep() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // 请求通知权限，并同步检查全屏 Intent 权限
-    Future<void> requestNotifAndCheckFullScreen() async {
+    Future<void> requestNotif() async {
       final granted = await ReminderService().requestPostNotificationsPermission();
       if (!mounted) return;
-
-      if (granted) {
-        // 通知权限已授予，检查全屏 Intent 权限
-        final fsGranted = await ReminderService().checkFullScreenIntent();
-        if (mounted) {
-          setState(() {
-            _notifGranted = true;
-            _fullScreenGranted = fsGranted;
-          });
-        }
-      } else {
-        setState(() {
-          _notifGranted = false;
-        });
-      }
+      setState(() => _notifGranted = granted);
     }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 通知权限图标
         Container(
           width: 64,
           height: 64,
@@ -810,12 +852,10 @@ class _PermissionGuideDialogState extends State<_PermissionGuideDialog> {
           ),
         ),
         const SizedBox(height: 20),
-
-        // 通知权限按钮
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _notifGranted ? null : requestNotifAndCheckFullScreen,
+            onPressed: _notifGranted ? null : requestNotif,
             style: ElevatedButton.styleFrom(
               backgroundColor: _notifGranted ? const Color(0xFF34C759) : const Color(0xFFFF9500),
               foregroundColor: Colors.white,
@@ -836,76 +876,6 @@ class _PermissionGuideDialogState extends State<_PermissionGuideDialog> {
             ),
           ),
         ),
-
-        // ★ 全屏 Intent 警告（仅 Android 14+ 且未授权时显示）
-        if (_notifGranted && !_fullScreenGranted) ...[
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF3B30).withAlpha(20),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.warning_amber_rounded,
-                        color: Color(0xFFFF3B30), size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      '需要额外设置',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : const Color(0xFF3C3C43),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Android 14+ 需要手动开启「全屏通知」权限才能弹出横幅。\n'
-                  '请点击下方按钮，在通知设置中打开「允许全屏通知」开关。',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF8E8E93),
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      await ReminderService().openNotificationSettings();
-                      // 返回后重新检查
-                      await Future.delayed(const Duration(seconds: 2));
-                      if (!mounted) return;
-                      final fsGranted =
-                          await ReminderService().checkFullScreenIntent();
-                      if (mounted) {
-                        setState(() => _fullScreenGranted = fsGranted);
-                      }
-                    },
-                    icon: const Icon(Icons.settings, size: 18),
-                    label: const Text('打开通知设置'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF007AFF),
-                      side: const BorderSide(color: Color(0xFF007AFF)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ],
     );
   }
