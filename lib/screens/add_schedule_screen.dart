@@ -40,8 +40,9 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       _locationController.text = widget.editItem!.location;
       _selectedDate = widget.editItem!.eventTime;
       _selectedTime = TimeOfDay.fromDateTime(widget.editItem!.eventTime);
-      _selectedRingtone = widget.editItem!.ringtoneUri ?? 'default';
-    } else {
+	      _selectedRingtone = widget.editItem!.ringtoneUri ?? 'default';
+	      _selectedReminderSeconds = widget.editItem!.reminderMinutes * 60;
+	    } else {
       _selectedDate = DateTime.now();
       _selectedTime = TimeOfDay.now();
       // 在 initState 后加载默认铃声
@@ -616,14 +617,15 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       final eventTime = _getCombinedDateTime();
       final provider = context.read<ScheduleProvider>();
 
-      if (isEditing) {
-        final updated = widget.editItem!.copyWith(
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim(),
-          location: _locationController.text.trim(),
-          eventTime: eventTime,
-          ringtoneUri: _selectedRingtone == 'default' ? null : _selectedRingtone,
-        );
+	      if (isEditing) {
+	        final updated = widget.editItem!.copyWith(
+	          title: _titleController.text.trim(),
+	          description: _descriptionController.text.trim(),
+	          location: _locationController.text.trim(),
+	          eventTime: eventTime,
+	          ringtoneUri: _selectedRingtone == 'default' ? null : _selectedRingtone,
+	          reminderMinutes: _selectedReminderSeconds ~/ 60,
+	        );
         await provider.updateItem(updated);
 
         // 重新调度提醒闹钟（如果已选择提醒时间）
@@ -641,13 +643,14 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
           ReminderService().cancelReminder(widget.editItem!.id!);
         }
       } else {
-        final item = ScheduleItem(
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim(),
-          location: _locationController.text.trim(),
-          eventTime: eventTime,
-          ringtoneUri: _selectedRingtone == 'default' ? null : _selectedRingtone,
-        );
+	        final item = ScheduleItem(
+	          title: _titleController.text.trim(),
+	          description: _descriptionController.text.trim(),
+	          location: _locationController.text.trim(),
+	          eventTime: eventTime,
+	          ringtoneUri: _selectedRingtone == 'default' ? null : _selectedRingtone,
+	          reminderMinutes: _selectedReminderSeconds ~/ 60,
+	        );
         final eventId = await provider.addItem(item);
 
         // 如果已选择提醒时间，调度真实闹钟
@@ -905,6 +908,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     {'label': '10分钟前', 'seconds': 600},
     {'label': '30分钟前', 'seconds': 1800},
     {'label': '1小时前', 'seconds': 3600},
+    {'label': '2天前', 'seconds': 172800},
+    {'label': '1周前', 'seconds': 604800},
   ];
 
   String _formatReminderText() {

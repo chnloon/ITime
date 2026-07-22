@@ -3,92 +3,82 @@
     android:id="@+id/floating_banner"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="0dp"
     android:clipToPadding="false"
-    android:paddingHorizontal="12dp"
-    android:paddingTop="52dp"
-    android:paddingBottom="8dp">
+    android:paddingHorizontal="10dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
     <LinearLayout
+        android:id="@+id/banner_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/banner_background"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingStart="0dp"
-        android:paddingEnd="12dp"
-        android:paddingVertical="14dp">
+        android:padding="0dp">
 
-        <!-- Left accent strip + Icon column -->
+        <!-- 左侧天蓝色背景 + 事件/提醒 -->
         <FrameLayout
-            android:layout_width="48dp"
+            android:layout_width="54dp"
             android:layout_height="match_parent"
-            android:gravity="center">
+            android:background="@drawable/bg_left_blue_section"
+            android:gravity="center"
+            android:paddingVertical="10dp">
 
-            <!-- Accent vertical bar -->
-            <View
-                android:layout_width="4dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="start"
-                android:layout_marginStart="0dp"
-                android:background="@drawable/accent_bar" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
 
-            <!-- Bell icon with circle background -->
-            <ImageView
-                android:id="@+id/banner_icon"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_bell_outline"
-                android:background="@drawable/icon_circle_bg"
-                android:padding="8dp"
-                android:contentDescription="提醒图标" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="事件"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="提醒"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="11sp"
+                    android:gravity="center" />
+
+            </LinearLayout>
         </FrameLayout>
 
-        <!-- Text content -->
+        <!-- 中间内容区域 -->
         <LinearLayout
+            android:id="@+id/content_area"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="8dp">
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="10dp"
+            android:paddingVertical="8dp">
 
-            <!-- Row 1: Title + Close button -->
-            <LinearLayout
+            <!-- 标题（跑马灯） -->
+            <TextView
+                android:id="@+id/tv_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:text="提醒标题"
+                android:textColor="#FF1C1C1E"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:focusable="false"
+                android:clickable="false"
+                android:focusableInTouchMode="false" />
 
-                <TextView
-                    android:id="@+id/tv_title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="提醒标题"
-                    android:textColor="#FF1C1C1E"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
-
-                <Button
-                    android:id="@+id/btn_close"
-                    style="@style/Widget.AppCompat.Button.Borderless"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:background="@drawable/close_circle_bg"
-                    android:text="✕"
-                    android:textColor="#FF8E8E93"
-                    android:textSize="13sp"
-                    android:gravity="center"
-                    android:padding="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp" />
-            </LinearLayout>
-
-            <!-- Row 2: Description / content -->
+            <!-- 描述 -->
             <TextView
                 android:id="@+id/tv_content"
                 android:layout_width="match_parent"
@@ -101,11 +91,11 @@
                 android:ellipsize="end"
                 android:lineSpacingExtra="2dp" />
 
-            <!-- Row 3: Location + Time -->
+            <!-- 地点 + 时间 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
@@ -119,8 +109,7 @@
                     android:textSize="12sp"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:visibility="gone"
-                    android:drawablePadding="3dp" />
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tv_event_time"

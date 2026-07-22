@@ -23,6 +23,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewAnimationUtils
 import android.view.WindowManager
@@ -66,7 +67,16 @@ class ReminderForegroundService : Service() {
         private const val EXTRA_RINGTONE_URI = "ringtone_uri"
 
         /** 悬浮窗显示时长（毫秒） */
-        private const val BANNER_DURATION_MS = 8000L
+        private const val BANNER_DURATION_MS = 5000L
+        /** 上滑手势触发的最小距离（像素） */
+        private const val SWIPE_THRESHOLD = 80
+
+        /** 跑马灯步进像素数（每帧） */
+        private const val MARQUEE_STEP_PX = 2
+        /** 跑马灯帧间隔（毫秒） */
+        private const val MARQUEE_INTERVAL_MS = 20L
+        /** 跑马灯滚动到末尾后的暂停时间（毫秒） */
+        private const val MARQUEE_PAUSE_MS = 2000L
 
         /**
          * 启动持久前台 Service（应用启动时调用）。
@@ -113,6 +123,8 @@ class ReminderForegroundService : Service() {
     private var overlayParams: WindowManager.LayoutParams? = null
     private val mainHandler = Handler(Looper.getMainLooper())
     private var dismissRunnable: Runnable? = null
+    private var marqueeHandler: Handler? = null
+    private var marqueeRunnable: Runnable? = null
     private var mediaPlayer: MediaPlayer? = null
     private var isPlayingRingtone = false
 
@@ -300,7 +312,9 @@ class ReminderForegroundService : Service() {
             )
 
             // ── 绑定数据 ──
-            bannerView.findViewById<TextView>(R.id.tv_title).text = title
+            val tvTitle = bannerView.findViewById<TextView>(R.id.tv_title)
+            tvTitle.text = title
+            startTitleMarquee(tvTitle, title)
 
             val contentText = if (description.isNotEmpty()) description else "点击查看详情"
             bannerView.findViewById<TextView>(R.id.tv_content).text = contentText
@@ -324,25 +338,41 @@ class ReminderForegroundService : Service() {
                 tvEventTime.visibility = View.GONE
             }
 
-            // 关闭按钮
-            bannerView.findViewById<View>(R.id.btn_close).setOnClickListener {
-                // 点击关闭时立即移除并停止铃声
-                stopRingtone()
-                removeOverlay()
-            }
-
-            // 点击横幅 → 打开 App 详情页 + 停止铃声
+            // 点击横幅 → 打开 App 主页 + 停止铃声
             bannerView.setOnClickListener {
                 stopRingtone()
                 removeOverlay()
-                val tapIntent = Intent(this, MainActivity::class.java).apply {
-                    putExtra("action", "detail")
-                    putExtra("event_id", eventId)
+                val mainIntent = Intent(this, MainActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 }
-                startActivity(tapIntent)
+                startActivity(mainIntent)
+            }
+
+            // ── 上滑手势关闭 ──
+            var touchStartY = 0f
+            bannerView.setOnTouchListener { _, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        touchStartY = event.rawY
+                        true
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        val diffY = touchStartY - event.rawY
+                        if (diffY > SWIPE_THRESHOLD) {
+                            Log.d(TAG, "检测到上滑手势 → 关闭弹窗")
+                            stopRingtone()
+                            removeOverlay()
+                            true
+                        } else {
+                            // 非上滑 → 触发点击（打开 App）
+                            bannerView.performClick()
+                            true
+                        }
+                    }
+                    else -> true
+                }
             }
 
             // ── 构建 WindowManager 参数 ──
@@ -395,43 +425,32 @@ class ReminderForegroundService : Service() {
     }
 
     /**
-     * 移除悬浮窗横幅，带滑动退出动画。
+     * 移除悬浮窗横幅。
+     * 播放退出动画的同时立即从 WindowManager 移除 View。
+     * 不再等待动画回调，确保弹窗必定消失。
      */
     private fun removeOverlay() {
         try {
+            stopMarquee()
             dismissRunnable?.let { mainHandler.removeCallbacks(it) }
             dismissRunnable = null
 
-            overlayView?.let { view ->
-                // 先播放退出动画，动画结束后再移除 View
-                try {
-                    val slideOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_top)
-                    slideOut.setAnimationListener(object : Animation.AnimationListener {
-                        override fun onAnimationStart(animation: Animation) {}
-                        override fun onAnimationRepeat(animation: Animation) {}
-                        override fun onAnimationEnd(animation: Animation) {
-                            // 动画结束后真正移除 View
-                            try {
-                                if (view.isAttachedToWindow || Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-                                    val wm = getSystemService(WINDOW_SERVICE) as WindowManager
-                                    wm.removeView(view)
-                                }
-                            } catch (e: Exception) {
-                                Log.w(TAG, "动画后移除 View 异常: ${e.message}")
-                            }
-                        }
-                    })
-                    view.startAnimation(slideOut)
-                } catch (e: Exception) {
-                    // 动画不可用时直接移除
-                    if (view.isAttachedToWindow || Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-                        val wm = getSystemService(WINDOW_SERVICE) as WindowManager
-                        wm.removeView(view)
-                    }
-                }
+            val view = overlayView ?: return
+            overlayView = null
+            overlayParams = null
 
-                overlayView = null
-                overlayParams = null
+            // 播放退出动画（仅视觉效果，不等回调）
+            try {
+                val slideOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_top)
+                view.startAnimation(slideOut)
+            } catch (e: Exception) {
+                Log.w(TAG, "退出动画加载失败: ${e.message}")
+            }
+
+            // 立即从 WindowManager 移除 View（不等待动画结束）
+            if (view.isAttachedToWindow || Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                val wm = getSystemService(WINDOW_SERVICE) as WindowManager
+                wm.removeView(view)
                 Log.d(TAG, "悬浮窗已移除")
             }
         } catch (e: Exception) {
@@ -439,6 +458,72 @@ class ReminderForegroundService : Service() {
             overlayView = null
             overlayParams = null
         }
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  标题跑马灯
+    // ═══════════════════════════════════════════════════
+
+    /**
+     * 启动标题跑马灯效果。
+     * 当标题文本宽度超出 TextView 宽度时：
+     * 1. 从初始位置开始向左逐帧移动
+     * 2. 移动到末尾后暂停 MARQUEE_PAUSE_MS
+     * 3. 重置到初始位置，重复循环
+     */
+    private fun startTitleMarquee(textView: TextView, text: String) {
+        stopMarquee()
+
+        textView.post {
+            val textViewWidth = textView.width
+            if (textViewWidth <= 0) return@post
+
+            val paint = textView.paint
+            val textWidth = paint.measureText(text)
+
+            // 文本不超出 → 不需要滚动
+            if (textWidth <= textViewWidth) return@post
+
+            val maxOffset = (textWidth - textViewWidth).toInt() + 10
+
+            val handler = Handler(Looper.getMainLooper())
+            marqueeHandler = handler
+
+            var offset = 0
+            var pausing = false
+
+            val runnable = object : Runnable {
+                override fun run() {
+                    if (pausing) {
+                        // 暂停结束，重置并继续
+                        pausing = false
+                        offset = 0
+                        textView.scrollTo(0, 0)
+                        handler.postDelayed(this, MARQUEE_INTERVAL_MS)
+                        return
+                    }
+
+                    offset += MARQUEE_STEP_PX
+                    textView.scrollTo(offset, 0)
+
+                    if (offset >= maxOffset) {
+                        // 已到末尾 → 暂停
+                        pausing = true
+                        handler.postDelayed(this, MARQUEE_PAUSE_MS)
+                    } else {
+                        handler.postDelayed(this, MARQUEE_INTERVAL_MS)
+                    }
+                }
+            }
+            marqueeRunnable = runnable
+            handler.postDelayed(runnable, MARQUEE_INTERVAL_MS)
+        }
+    }
+
+    private fun stopMarquee() {
+        marqueeRunnable?.let { marqueeHandler?.removeCallbacks(it) }
+        marqueeRunnable = null
+        marqueeHandler = null
     }
 
     /**
