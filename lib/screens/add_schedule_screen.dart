@@ -92,6 +92,11 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       return DateTime(year, month + 1, 0).day;
     }
 
+    // 用本地变量跟踪选中值（避免 CupertinoPicker 构建前访问 selectedItem 报错）
+    int selYear = tempYear;
+    int selMonth = tempMonth;
+    int selDay = tempDay;
+
     // 年滚轮控制器（从当前年 -10 到 +40）
     final nowYear = DateTime.now().year;
     final yearStart = nowYear - 10;
@@ -115,9 +120,9 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            // 每次状态刷新时重新计算当月天数
-            final y = yearController.selectedItem + yearStart;
-            final m = monthController.selectedItem + 1;
+            // 每次状态刷新时重新计算当月天数（使用本地变量，不访问 selectedItem）
+            final y = selYear;
+            final m = selMonth;
             final maxDay = daysInMonth(y, m);
 
             return SizedBox(
@@ -163,11 +168,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                             ),
                           ),
                           onPressed: () {
-                            final y2 = yearController.selectedItem + yearStart;
-                            final m2 = monthController.selectedItem + 1;
-                            final d2 = (dayController.selectedItem % daysInMonth(y2, m2)) + 1;
                             setState(() {
-                              _selectedDate = DateTime(y2, m2, d2);
+                              _selectedDate = DateTime(selYear, selMonth, selDay.clamp(1, daysInMonth(selYear, selMonth)));
                             });
                             Navigator.pop(ctx);
                           },
@@ -187,7 +189,11 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                             itemExtent: 40,
                             backgroundColor: bgColor,
                             looping: true,
-                            onSelectedItemChanged: (_) => setSheetState(() {}),
+                            onSelectedItemChanged: (index) {
+                              selYear = yearStart + index;
+                              selMonth = selMonth.clamp(1, 12);
+                              setSheetState(() {});
+                            },
                             children: List.generate(yearCount, (i) {
                               return Center(
                                 child: Text(
@@ -209,7 +215,11 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                             itemExtent: 40,
                             backgroundColor: bgColor,
                             looping: true,
-                            onSelectedItemChanged: (_) => setSheetState(() {}),
+                            onSelectedItemChanged: (index) {
+                              selMonth = index + 1;
+                              selDay = selDay.clamp(1, daysInMonth(selYear, selMonth));
+                              setSheetState(() {});
+                            },
                             children: List.generate(12, (i) {
                               return Center(
                                 child: Text(
@@ -231,7 +241,10 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                             itemExtent: 40,
                             backgroundColor: bgColor,
                             looping: true,
-                            onSelectedItemChanged: (_) => setSheetState(() {}),
+                            onSelectedItemChanged: (index) {
+                              selDay = (index % daysInMonth(selYear, selMonth)) + 1;
+                              setSheetState(() {});
+                            },
                             children: List.generate(31, (i) {
                               return Center(
                                 child: Text(
@@ -315,6 +328,10 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     if (tempHour == 0) tempHour = 12;
     int tempMinute = _selectedTime.minute;
 
+    // 用本地变量跟踪选中值（避免 CupertinoPicker 构建前访问 selectedItem 报错）
+    int selHour12 = tempHour;
+    int selMinute = tempMinute;
+
     final hourController = FixedExtentScrollController(initialItem: tempHour - 1);
     final minuteController = FixedExtentScrollController(initialItem: tempMinute);
 
@@ -370,17 +387,16 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                             ),
                           ),
                           onPressed: () {
-                            final h12 = hourController.selectedItem + 1;
                             int h24;
                             if (tempAmPm == 0) {
-                              h24 = (h12 == 12) ? 0 : h12;
+                              h24 = (selHour12 == 12) ? 0 : selHour12;
                             } else {
-                              h24 = (h12 == 12) ? 12 : h12 + 12;
+                              h24 = (selHour12 == 12) ? 12 : selHour12 + 12;
                             }
                             setState(() {
                               _selectedTime = TimeOfDay(
                                 hour: h24,
-                                minute: minuteController.selectedItem % 60,
+                                minute: selMinute % 60,
                               );
                             });
                             Navigator.pop(ctx);
@@ -475,7 +491,10 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                                   itemExtent: 40,
                                   backgroundColor: bgColor,
                                   looping: true,
-                                  onSelectedItemChanged: (_) {},
+                                  onSelectedItemChanged: (index) {
+                                    selHour12 = index + 1;
+                                    setSheetState(() {});
+                                  },
                                   children: List.generate(12, (i) {
                                     return Center(
                                       child: Text(
@@ -497,7 +516,10 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                                   itemExtent: 40,
                                   backgroundColor: bgColor,
                                   looping: true,
-                                  onSelectedItemChanged: (_) {},
+                                  onSelectedItemChanged: (index) {
+                                    selMinute = index;
+                                    setSheetState(() {});
+                                  },
                                   children: List.generate(60, (i) {
                                     return Center(
                                       child: Text(
