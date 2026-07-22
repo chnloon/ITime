@@ -22,12 +22,23 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 72,
-              color: isDark ? const Color(0xFF38383A) : const Color(0xFFC7C7CC),
+            // Icon container with background
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF2C2C2E)
+                    : const Color(0xFFF2F2F7),
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: Icon(
+                icon,
+                size: 44,
+                color: isDark ? const Color(0xFF636366) : const Color(0xFFC7C7CC),
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             Text(
               Translations.tr(titleKey),
               style: TextStyle(
@@ -43,6 +54,7 @@ class EmptyState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 color: isDark ? const Color(0xFF636366) : const Color(0xFFAEAEB2),
+                height: 1.4,
               ),
             ),
           ],

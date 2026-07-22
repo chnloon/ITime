@@ -1,71 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/floating_banner"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/banner_background"
-    android:elevation="8dp"
-    android:orientation="horizontal"
-    android:padding="12dp"
-    android:gravity="center_vertical">
-
-    <ImageView
-        android:id="@+id/banner_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="12dp"
-        android:src="@drawable/ic_bell_outline"
-        android:contentDescription="提醒图标" />
+    android:layout_marginTop="0dp"
+    android:clipToPadding="false"
+    android:paddingHorizontal="12dp"
+    android:paddingTop="52dp"
+    android:paddingBottom="8dp">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:background="@drawable/banner_background"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="0dp"
+        android:paddingEnd="12dp"
+        android:paddingVertical="14dp">
 
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="提醒标题"
-            android:textColor="#FF1C1C1E"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+        <!-- Left accent strip + Icon column -->
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:gravity="center">
 
-        <TextView
-            android:id="@+id/tv_content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="提醒内容"
-            android:textColor="#FF8E8E93"
-            android:textSize="13sp"
-            android:maxLines="1"
-            android:ellipsize="end" />
+            <!-- Accent vertical bar -->
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="start"
+                android:layout_marginStart="0dp"
+                android:background="@drawable/accent_bar" />
 
-        <TextView
-            android:id="@+id/tv_location"
-            android:layout_width="wrap_content"
+            <!-- Bell icon with circle background -->
+            <ImageView
+                android:id="@+id/banner_icon"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_bell_outline"
+                android:background="@drawable/icon_circle_bg"
+                android:padding="8dp"
+                android:contentDescription="提醒图标" />
+        </FrameLayout>
+
+        <!-- Text content -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:text="地点"
-            android:textColor="#FF8E8E93"
-            android:textSize="12sp"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:visibility="gone" />
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="8dp">
+
+            <!-- Row 1: Title + Close button -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="提醒标题"
+                    android:textColor="#FF1C1C1E"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <Button
+                    android:id="@+id/btn_close"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/close_circle_bg"
+                    android:text="✕"
+                    android:textColor="#FF8E8E93"
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:padding="0dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp" />
+            </LinearLayout>
+
+            <!-- Row 2: Description / content -->
+            <TextView
+                android:id="@+id/tv_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="提醒内容"
+                android:textColor="#FF8E8E93"
+                android:textSize="14sp"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:lineSpacingExtra="2dp" />
+
+            <!-- Row 3: Location + Time -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tv_location"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="地点"
+                    android:textColor="#FF8E8E93"
+                    android:textSize="12sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:visibility="gone"
+                    android:drawablePadding="3dp" />
+
+                <TextView
+                    android:id="@+id/tv_event_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="#FFC7C7CC"
+                    android:textSize="11sp"
+                    android:gravity="end" />
+            </LinearLayout>
+        </LinearLayout>
+
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_close"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/close_circle_bg"
-        android:text="✕"
-        android:textColor="#FF8E8E93"
-        android:textSize="14sp"
-        android:gravity="center" />
-
-</LinearLayout>
+</FrameLayout>

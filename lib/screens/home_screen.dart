@@ -18,13 +18,16 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   final _scrollController = ScrollController();
   StreamSubscription<int>? _detailSubscription;
   int? _highlightedEventId;
   bool _permissionWarningShown = false;
   bool _exactAlarmMissing = false;
   bool _systemAlertWindowMissing = false;
+  late AnimationController _fabController;
+  late Animation<double> _fabScale;
 
   /// 估算的卡片高度（用于滚动定位）
   static const double _cardHeight = 104.0;
@@ -33,6 +36,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _fabController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+    _fabScale = Tween<double>(begin: 1.0, end: 1.06).animate(
+      CurvedAnimation(parent: _fabController, curve: Curves.easeInOut),
+    );
     _detailSubscription = ReminderService.showDetailStream.listen((eventId) {
       if (!mounted) return;
       _scrollToItem(eventId);
@@ -88,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _detailSubscription?.cancel();
     _scrollController.dispose();
+    _fabController.dispose();
     super.dispose();
   }
 
@@ -276,32 +287,40 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-      // FAB - iOS style
-      floatingActionButton: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: const Color(0xFF007AFF),
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF007AFF).withAlpha(77),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: IconButton(
-          icon: const Icon(Icons.add, color: Colors.white, size: 28),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const AddScheduleScreen(),
+      // FAB - iOS style with gentle pulse animation
+      floatingActionButton: AnimatedBuilder(
+        animation: _fabScale,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _fabScale.value,
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: const Color(0xFF007AFF),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF007AFF).withAlpha(77),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+              child: IconButton(
+                icon: const Icon(Icons.add, color: Colors.white, size: 28),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AddScheduleScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }
