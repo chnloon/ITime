@@ -1,5 +1,5 @@
 {
-  "versionCode": 34,
+  "versionCode": 2034,
   "versionName": "1.1.11",
   "force": false,
   "changelog": "修复：UTF-8 BOM 导致更新清单解析失败，更新功能彻底修复。",
