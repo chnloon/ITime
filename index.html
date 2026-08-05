@@ -12,9 +12,14 @@
   h1 { font-size:22px; color:#1c1c1e; margin-bottom:6px; }
   .ver { color:#8e8e93; font-size:14px; margin-bottom:20px; }
   .wechat-tip { display:none; background:#fff7e6; border:1px solid #ffd591; color:#ad6800; border-radius:12px; padding:10px 12px; font-size:13px; line-height:1.6; margin-bottom:16px; }
-  .btn { display:block; background:#007aff; color:#fff; text-decoration:none; border-radius:24px; padding:14px; font-size:16px; font-weight:600; margin-bottom:12px; }
+  .btn { display:block; width:100%; background:#007aff; color:#fff; text-decoration:none; border:none; border-radius:24px; padding:14px; font-size:16px; font-weight:600; margin-bottom:12px; }
   .btn2 { background:#f2f2f7; color:#007aff; }
   .tip { color:#8e8e93; font-size:12px; line-height:1.6; margin-top:8px; }
+  #guideMask { display:none; position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:999; align-items:center; justify-content:center; padding:24px; }
+  .guide { background:#fff; border-radius:16px; max-width:360px; width:100%; padding:24px 20px; text-align:center; }
+  .guide-url { background:#f2f2f7; border-radius:10px; padding:10px; font-size:12px; color:#8e8e93; word-break:break-all; margin:12px 0; }
+  .guide-steps { text-align:left; font-size:14px; color:#333; line-height:2; margin:0 0 18px; }
+  .guide-btn { background:#007aff; color:#fff; border:none; border-radius:22px; padding:12px 32px; font-size:15px; }
 </style>
 </head>
 <body>
@@ -22,41 +27,92 @@
   <div class="logo">Oi</div>
   <h1>OiGo 日程提醒</h1>
   <p class="ver" id="ver">正在获取最新版本...</p>
-  <div class="wechat-tip" id="wechatTip">⚠️ 微信/QQ 内无法直接下载安装包，请点击右上角「···」→「在浏览器中打开」，即可正常下载。</div>
-  <a class="btn" id="dlArm" href="javascript:void(0)">点击下载（主流手机）</a>
-  <a class="btn btn2" id="dlV7" href="javascript:void(0)">下载兼容版（老机型）</a>
+  <div class="wechat-tip" id="wechatTip">⚠️ 微信内无法直接下载安装包，请点击右上角"···"→"在浏览器中打开"，即可自动开始下载。</div>
+  <button class="btn" id="dlArm">点击下载（主流手机）</button>
+  <button class="btn btn2" id="dlV7">下载兼容版（老机型）</button>
   <p class="tip">下载后点击安装；如提示未知来源，请在系统设置中允许。</p>
 </div>
+
+<div id="guideMask">
+  <div class="guide">
+    <div style="font-size:16px;color:#1c1c1e;line-height:1.6;font-weight:600;">微信内无法直接下载安装包<br>下载链接已复制到剪贴板</div>
+    <div class="guide-url" id="guideUrl"></div>
+    <div class="guide-steps">
+      1️⃣ 点击右上角 <b style="color:#007aff;">···</b><br>
+      2️⃣ 选择 <b style="color:#007aff;">「在浏览器中打开」</b><br>
+      3️⃣ 浏览器打开后 <b style="color:#007aff;">自动开始下载</b>
+    </div>
+    <button class="guide-btn" id="guideClose">我知道了</button>
+  </div>
+</div>
+
 <script>
 (function(){
-  if (/MicroMessenger|QQ\//i.test(navigator.userAgent)) {
-    document.getElementById('wechatTip').style.display = 'block';
-  }
+  var isWechat = /MicroMessenger|QQ\//i.test(navigator.userAgent);
   // 兜底地址（v1.1.17）
   var fb = {
     ver: '1.1.17',
     arm: 'https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v40.apk',
     v7:  'https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v40.apk'
   };
-  function apply(d){
+  var elArm = document.getElementById('dlArm');
+  var elV7 = document.getElementById('dlV7');
+  var elVer = document.getElementById('ver');
+  var loaded = false;
+
+  function setUrls(d){
+    loaded = true;
     var arm = (d.urls && (d.urls['arm64-v8a'] || d.urls['armeabi-v7a'])) || d.url || d.arm;
     var v7  = (d.urls && d.urls['armeabi-v7a']) || arm;
-    document.getElementById('ver').textContent = '最新版本 v' + d.versionName;
-    document.getElementById('dlArm').href = arm;
-    document.getElementById('dlV7').href = v7;
+    elArm.setAttribute('data-url', arm);
+    elV7.setAttribute('data-url', v7);
+    elVer.textContent = '最新版本 v' + d.versionName;
   }
-  // GitHub API 读取最新清单（支持跨域）；6 秒超时兜底，避免按钮失效
-  var done = false;
-  function fallback(){ if (!done) { done = true; apply(fb); } }
+  function fallback(){ if (!loaded) setUrls(fb); }
   setTimeout(fallback, 6000);
   fetch('https://api.github.com/repos/chnloon/ITime/contents/latest.json', { headers: { 'User-Agent': 'OiGo' } })
     .then(function(r){ return r.json(); })
     .then(function(b){
       var txt = decodeURIComponent(escape(atob(b.content.replace(/\s/g,''))));
-      apply(JSON.parse(txt));
-      done = true;
+      setUrls(JSON.parse(txt));
     })
     .catch(fallback);
+
+  function copyText(t){
+    function legacy(){
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try { document.execCommand('copy'); } catch(e){}
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(function(){}, legacy);
+    } else { legacy(); }
+  }
+
+  function showGuide(url){
+    document.getElementById('guideUrl').textContent = url;
+    document.getElementById('guideMask').style.display = 'flex';
+    copyText(url);
+  }
+  document.getElementById('guideClose').addEventListener('click', function(){
+    document.getElementById('guideMask').style.display = 'none';
+  });
+
+  if (isWechat) {
+    document.getElementById('wechatTip').style.display = 'block';
+    elArm.addEventListener('click', function(e){ e.preventDefault(); showGuide(elArm.getAttribute('data-url') || fb.arm); });
+    elV7.addEventListener('click', function(e){ e.preventDefault(); showGuide(elV7.getAttribute('data-url') || fb.v7); });
+  } else {
+    // 系统浏览器：打开后自动开始下载，无需再点按钮
+    window.addEventListener('load', function(){
+      setTimeout(function(){
+        var u = elArm.getAttribute('data-url') || fb.arm;
+        window.location.href = u;
+      }, 600);
+    });
+  }
 })();
 </script>
 </body>
