@@ -1,12 +1,12 @@
 ﻿{
-  "versionCode": 32,
-  "versionName": "1.1.9",
+  "versionCode": 33,
+  "versionName": "1.1.10",
   "force": false,
-  "changelog": "修复：界面文字严格跟随所选语言（简体/繁体/英语），默认简体中文；提醒时间、设置、弹窗全部本地化。",
+  "changelog": "添加事件页填写框改为镂空样式（透明背景+描边）。",
   "urls": {
-    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v32.apk",
-    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v32.apk",
-    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v32.apk"
+    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v33.apk",
+    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v33.apk",
+    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v33.apk"
   },
-  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v32.apk"
+  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v33.apk"
 }
