@@ -1,8 +1,8 @@
 ﻿{
-  "versionCode": 24,
-  "versionName": "1.1.1",
+  "versionCode": 25,
+  "versionName": "1.1.2",
   "force": false,
-  "changelog": "测试更新：v1.1.1 版本，用于验证在线更新流程。",
+  "changelog": "修复：release 版联网权限；更新：v1.1.2 发布测试。",
   "urls": {
     "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a.apk",
     "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a.apk",
