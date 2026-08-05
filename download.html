@@ -32,25 +32,31 @@
   if (/MicroMessenger|QQ\//i.test(navigator.userAgent)) {
     document.getElementById('wechatTip').style.display = 'block';
   }
-  // 兜底地址（v1.1.15）
+  // 兜底地址（v1.1.17）
   var fb = {
-    ver: '1.1.15',
-    arm: 'https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v38.apk',
-    v7:  'https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v38.apk'
+    ver: '1.1.17',
+    arm: 'https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v40.apk',
+    v7:  'https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v40.apk'
   };
   function apply(d){
+    var arm = (d.urls && (d.urls['arm64-v8a'] || d.urls['armeabi-v7a'])) || d.url || d.arm;
+    var v7  = (d.urls && d.urls['armeabi-v7a']) || arm;
     document.getElementById('ver').textContent = '最新版本 v' + d.versionName;
-    document.getElementById('dlArm').href = d.urls['arm64-v8a'];
-    document.getElementById('dlV7').href = d.urls['armeabi-v7a'];
+    document.getElementById('dlArm').href = arm;
+    document.getElementById('dlV7').href = v7;
   }
-  // GitHub API 读取最新清单（支持跨域）
+  // GitHub API 读取最新清单（支持跨域）；6 秒超时兜底，避免按钮失效
+  var done = false;
+  function fallback(){ if (!done) { done = true; apply(fb); } }
+  setTimeout(fallback, 6000);
   fetch('https://api.github.com/repos/chnloon/ITime/contents/latest.json', { headers: { 'User-Agent': 'OiGo' } })
     .then(function(r){ return r.json(); })
     .then(function(b){
       var txt = decodeURIComponent(escape(atob(b.content.replace(/\s/g,''))));
       apply(JSON.parse(txt));
+      done = true;
     })
-    .catch(function(){ apply(fb); });
+    .catch(fallback);
 })();
 </script>
 </body>
