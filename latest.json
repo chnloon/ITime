@@ -1,12 +1,12 @@
 {
-  "versionCode": 2062,
-  "versionName": "1.1.39",
+  "versionCode": 2063,
+  "versionName": "1.1.40",
   "force": false,
-  "changelog": "新增版本更新红点提醒：主页设置图标/检查更新/更新页均显示未读红点，点击下载后红点自动消失；滚动提醒条新增X关闭按钮（内容不变不再出现，内容更新后重新出现）；健康自律体验优化。",
+  "changelog": "新增：自律任务「跳过」按钮、全部跳过可继续完成任务、收录完成健康建议提示、事件提醒弹窗主题化（浅色白底/深色黑底+紧急色外框+事件标签+右侧位置）、主页顶部固定事件区独立滚动、更新悬浮窗纯色+进度；修复若干问题。",
   "urls": {
-    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v62.apk",
-    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v62.apk",
-    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v62.apk"
+    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v63.apk",
+    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v63.apk",
+    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v63.apk"
   },
-  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v62.apk"
+  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v63.apk"
 }
