@@ -1,12 +1,12 @@
 {
-  "versionCode": 2061,
-  "versionName": "1.1.38",
+  "versionCode": 2062,
+  "versionName": "1.1.39",
   "force": false,
-  "changelog": "新增健康自律系统（饮水/饮食/运动/戒烟每日提醒，任务到点前5分钟系统弹窗）；事件卡片与灰箱镂空效果；多语言（简中/繁中/英文）；设置页「有新版本可更新」直接下载；关于页激活优化；修复若干BUG。",
+  "changelog": "新增版本更新红点提醒：主页设置图标/检查更新/更新页均显示未读红点，点击下载后红点自动消失；滚动提醒条新增X关闭按钮（内容不变不再出现，内容更新后重新出现）；健康自律体验优化。",
   "urls": {
-    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v61.apk",
-    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v61.apk",
-    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v61.apk"
+    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v62.apk",
+    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v62.apk",
+    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v62.apk"
   },
-  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v61.apk"
+  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v62.apk"
 }
