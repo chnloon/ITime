@@ -1,12 +1,12 @@
 {
-  "versionCode": 2063,
-  "versionName": "1.1.40",
+  "versionCode": 2064,
+  "versionName": "1.1.41",
   "force": false,
-  "changelog": "新增：自律任务「跳过」按钮、全部跳过可继续完成任务、收录完成健康建议提示、事件提醒弹窗主题化（浅色白底/深色黑底+紧急色外框+事件标签+右侧位置）、主页顶部固定事件区独立滚动、更新悬浮窗纯色+进度；修复若干问题。",
+  "changelog": "主页优化：问候区固定置顶，事件卡片在展示区内独立上下滑动，滚动经过广告条时渐隐、下滑渐现；自律任务跳过/继续完成任务；收录完成健康建议提示；事件提醒弹窗主题化；更新悬浮窗纯色+进度。",
   "urls": {
-    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v63.apk",
-    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v63.apk",
-    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v63.apk"
+    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v64.apk",
+    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v64.apk",
+    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v64.apk"
   },
-  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v63.apk"
+  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v64.apk"
 }
