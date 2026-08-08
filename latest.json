@@ -1,12 +1,12 @@
 {
-  "versionCode": 2071,
-  "versionName": "1.1.48",
+  "versionCode": 2072,
+  "versionName": "1.1.49",
   "force": false,
-  "changelog": "根治自律系统提醒不弹窗：健康提醒改用高优先级通知渠道（强制弹横幅、锁屏可见、铃声+震动），确保到点/提前5分钟弹窗提醒。",
+  "changelog": "权限自动化：每次启动自动补申请通知/精确闹钟/电池优化权限，开启自律系统时同样自动申请，尽量减少用户手动设置。",
   "urls": {
-    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v71.apk",
-    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v71.apk",
-    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v71.apk"
+    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v72.apk",
+    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v72.apk",
+    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v72.apk"
   },
-  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v71.apk"
+  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v72.apk"
 }
