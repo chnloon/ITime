@@ -1,12 +1,12 @@
 {
-  "versionCode": 2068,
-  "versionName": "1.1.45",
+  "versionCode": 2069,
+  "versionName": "1.1.46",
   "force": false,
-  "changelog": "自律系统总结页：当天有未完成任务时显示「继续任务」按钮，点击重新发布未完成任务继续完成。",
+  "changelog": "修复任务漏显示：未执行任务保留展示（4小时内显示已过时供处理），不再直接跳到更晚任务；过时时间按小时显示。",
   "urls": {
-    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v68.apk",
-    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v68.apk",
-    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v68.apk"
+    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v69.apk",
+    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v69.apk",
+    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v69.apk"
   },
-  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v68.apk"
+  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v69.apk"
 }
