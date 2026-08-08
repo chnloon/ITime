@@ -1,12 +1,12 @@
 {
-  "versionCode": 2065,
-  "versionName": "1.1.42",
+  "versionCode": 2066,
+  "versionName": "1.1.43",
   "force": false,
-  "changelog": "修复更新提示标题在深色主题下不可见：标题改为蓝色，副标题颜色随主题优化。",
+  "changelog": "主页问候区固定在通知栏下方（SafeArea），不再与状态栏重叠；主页背景固定不随列表滚动。",
   "urls": {
-    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v65.apk",
-    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v65.apk",
-    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v65.apk"
+    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v66.apk",
+    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v66.apk",
+    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v66.apk"
   },
-  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v65.apk"
+  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v66.apk"
 }
