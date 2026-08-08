@@ -1,0 +1,41 @@
+﻿{
+  "version": 1,
+  "updatedAt": "2026-08-08",
+  "byPeriod": {
+    "zh_CN": {
+      "wake": {"title": "晨起饮水", "short": "建议：晨起空腹喝温水200ml，小口慢饮。\n鼓励：好习惯从早上第一杯水开始！"},
+      "breakfast": {"title": "早餐", "short": "建议：蛋白+复合碳水+果蔬（全麦面包+鸡蛋+牛奶）。\n禁止：油条、煎饼、奶茶、甜面包。"},
+      "am_snack": {"title": "上午加餐", "short": "建议：水果或无糖酸奶一小份。\n禁止：蛋糕、饼干、糖果、含糖奶茶。"},
+      "lunch": {"title": "午餐", "short": "建议：半盘蔬菜+1掌心蛋白+1拳主食。\n禁止：油炸、糖醋、干锅、重油外卖、奶茶。"},
+      "pm_snack": {"title": "下午加餐", "short": "建议：香蕉或原味坚果≤10g。\n禁止：薯片、巧克力、奶油点心。"},
+      "dinner": {"title": "晚餐", "short": "建议：清淡减量，睡前3小时吃完。\n禁止：烧烤、火锅、夜宵、大量面食。"},
+      "bedtime": {"title": "睡前注意", "short": "建议：21点后不再进食，22点后少喝水。\n禁止：零食、夜宵、大量饮水。"},
+      "water": {"title": "喝水", "short": "鼓励：喝杯温水，小口多次，坚持就是胜利！"}
+    },
+    "zh_HK": {
+      "wake": {"title": "晨起飲水", "short": "建議：晨起空腹喝溫水200ml，小口慢飲。\n鼓勵：好習慣從早上第一杯水開始！"},
+      "breakfast": {"title": "早餐", "short": "建議：蛋白+複合碳水+果蔬（全麥麵包+雞蛋+牛奶）。\n禁止：油條、煎餅、奶茶、甜麵包。"},
+      "am_snack": {"title": "上午加餐", "short": "建議：水果或無糖酸奶一小份。\n禁止：蛋糕、餅乾、糖果、含糖奶茶。"},
+      "lunch": {"title": "午餐", "short": "建議：半盤蔬菜+1掌心蛋白+1拳主食。\n禁止：油炸、糖醋、乾鍋、重油外賣、奶茶。"},
+      "pm_snack": {"title": "下午加餐", "short": "建議：香蕉或原味堅果≤10g。\n禁止：薯片、朱古力、忌廉點心。"},
+      "dinner": {"title": "晚餐", "short": "建議：清淡減量，睡前3小時吃完。\n禁止：燒烤、火鍋、宵夜、大量麵食。"},
+      "bedtime": {"title": "睡前注意", "short": "建議：21點後不再進食，22點後少喝水。\n禁止：零食、宵夜、大量飲水。"},
+      "water": {"title": "喝水", "short": "鼓勵：喝杯溫水，小口多次，堅持就是勝利！"}
+    },
+    "en": {
+      "wake": {"title": "Morning water", "short": "Tip: Drink 200ml warm water on an empty stomach, sip slowly.\nKeep it up — every great day starts with water!"},
+      "breakfast": {"title": "Breakfast", "short": "Tip: Protein + whole grains + fruit/veg (whole wheat bread + egg + milk).\nAvoid: fried dough, pancakes, milk tea, sweet bread."},
+      "am_snack": {"title": "Morning snack", "short": "Tip: A piece of fruit or a small unsweetened yogurt.\nAvoid: cake, cookies, candy, sugary milk tea."},
+      "lunch": {"title": "Lunch", "short": "Tip: Half plate veggies + palm of protein + fist of carbs.\nAvoid: fried, sweet-sour, dry pot, greasy takeout, milk tea."},
+      "pm_snack": {"title": "Afternoon snack", "short": "Tip: A banana or ≤10g plain nuts.\nAvoid: chips, chocolate, creamy desserts."},
+      "dinner": {"title": "Dinner", "short": "Tip: Keep it light, finish 3 hours before bed.\nAvoid: BBQ, hotpot, late-night snacks, lots of noodles."},
+      "bedtime": {"title": "Before bed", "short": "Tip: No food after 9pm, limit water after 10pm.\nAvoid: snacks, midnight eating, heavy drinking."},
+      "water": {"title": "Water", "short": "Cheer: Drink a glass of warm water, sip often — keep going!"}
+    }
+  },
+  "smoking": {
+    "zh_CN": {"title": "少抽一支", "short": "建议：烟瘾来时喝温水、嚼口香糖，深呼吸10分钟就过去。\n禁止：饭后、酒局等触发场景马上点烟。"},
+    "zh_HK": {"title": "少抽一支", "short": "建議：煙癮來時喝溫水、嚼香口膠，深呼吸10分鐘就過去。\n禁止：飯後、酒局等觸發場景馬上點煙。"},
+    "en": {"title": "Smoke less", "short": "Tip: When craving, drink water / chew gum, take deep breaths for 10 minutes.\nAvoid: lighting up right after meals or at parties."}
+  }
+}
