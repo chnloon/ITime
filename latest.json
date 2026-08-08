@@ -1,12 +1,12 @@
 {
-  "versionCode": 2066,
-  "versionName": "1.1.43",
+  "versionCode": 2067,
+  "versionName": "1.1.44",
   "force": false,
-  "changelog": "主页问候区固定在通知栏下方（SafeArea），不再与状态栏重叠；主页背景固定不随列表滚动。",
+  "changelog": "严格执行：未到任务时间只能点「跳过」，完成/未完成仅到时后可点；健康任务到前5分钟弹窗提醒一次、任务到时再次弹窗提醒一次。",
   "urls": {
-    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v66.apk",
-    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v66.apk",
-    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v66.apk"
+    "arm64-v8a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v67.apk",
+    "armeabi-v7a": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-armeabi-v7a-v67.apk",
+    "x86_64": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-x86_64-v67.apk"
   },
-  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v66.apk"
+  "url": "https://cdn.jsdelivr.net/gh/chnloon/ITime@main/apk/oigo-arm64-v8a-v67.apk"
 }
