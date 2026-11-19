@@ -1,1 +1,11 @@
-{"versionCode":115,"versionName":"0.89.0-tv","force":false,"changelog":"· 卡顿会先测速再自动切到更快的线路，并从当前进度接着播（不会再从头）；\n· TV 全屏按「下」键：进度条下方补齐 上一集 / 下一集 / 倍速 / 选集；\n· 首页键盘键位列对齐、功能键配色修正。","apk":"https://gitee.com/chnloon/oigo-update/releases/download/htv-latest-tv/htv-latest-tv.apk","mirrors":["https://ghproxy.net/https://raw.githubusercontent.com/chnloon/ITime/htv-apk-tv/htv-latest-tv.apk","https://gh-proxy.com/https://raw.githubusercontent.com/chnloon/ITime/htv-apk-tv/htv-latest-tv.apk","https://raw.githubusercontent.com/chnloon/ITime/htv-apk-tv/htv-latest-tv.apk"],"at":1793799921686}
+{
+  "versionCode": 117,
+  "versionName": "0.90.1-tv",
+  "force": false,
+  "changelog": "",
+  "apk": "https://raw.githubusercontent.com/chnloon/ITime/htv-apk-tv/htv-latest-tv.apk?v=117",
+  "mirrors": [
+    "https://raw.githubusercontent.com/chnloon/ITime/htv-apk-tv/htv-latest-tv.apk?v=117",
+    "https://cdn.jsdelivr.net/gh/chnloon/ITime@htv-apk-tv/htv-latest-tv.apk?v=117"
+  ]
+}
